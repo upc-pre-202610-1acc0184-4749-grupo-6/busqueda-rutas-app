@@ -223,3 +223,6 @@ verify_*.py
 .DS_Store
 Thumbs.db
 
+
+# Microsoft Office temporary lock files
+~$*
