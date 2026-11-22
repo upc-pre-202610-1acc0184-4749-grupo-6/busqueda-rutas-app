@@ -332,7 +332,7 @@ if __name__ == "__main__":
         [0, 9, 0, 0, 0, 0, 4, 0, 0]
     ]
 
-    print("\n--- TABLERO DE PRUEBA (Dificultad Alta: 17 pistas iniciales) ---")
+    print("\n--- TABLERO DE PRUEBA (Dificultad Alta: 21 pistas iniciales) ---")
     imprimir_tablero(tablero_dificil, k=3)
 
     solver = SudokuSolver(tablero_dificil, k=3)
