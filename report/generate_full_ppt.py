@@ -223,9 +223,9 @@ def build_presentation():
     cp0.font.color.rgb = C_UPC_RED
     
     students = [
-        "• Kobashigawa Ugaz, Juan Alejandro (u202412921) — Fundamentación Teórica y Modelado en Grafos",
-        "• Pareja Calloapaza, Marcelo Fausto (u202411627) — Motor Algorítmico (MRV + Bitmasks) y Complejidad Big-O",
-        "• Riveros Mera, Jennifer Yamilet (u20241c998) — Ingeniería de Software, GUI Tkinter y Benchmarking Experimental"
+        "• Kobashigawa (u202412921) — Fundamentación Teórica y Modelado en Grafos",
+        "• Pareja (u202411627) — Motor Algorítmico (MRV + Bitmasks) y Complejidad Big-O",
+        "• Riveros (u20241c998) — Ingeniería de Software, GUI Tkinter y Benchmarking Experimental"
     ]
     for st in students:
         p = ct_tf.add_paragraph()
@@ -244,7 +244,7 @@ def build_presentation():
     # SLIDE 2: CONTEXTO Y DESCRIPCIÓN DEL PROBLEMA
     # =========================================================================
     s2 = prs.slides.add_slide(blank_layout)
-    add_header(s2, "El Desafío de Escala en Rompecabezas Numéricos (CSP)", "1. Contexto y Problemática", "Juan Kobashigawa", 2)
+    add_header(s2, "El Desafío de Escala en Rompecabezas Numéricos (CSP)", "1. Contexto y Problemática", "Kobashigawa", 2)
     
     # Left Card
     c2_1 = add_card(s2, 0.8, 1.45, 5.6, 4.3, "Relevancia en la Industria del Software")
@@ -302,7 +302,7 @@ def build_presentation():
     # SLIDE 3: FUNDAMENTACIÓN TEÓRICA Y NP-COMPLETITUD
     # =========================================================================
     s3 = prs.slides.add_slide(blank_layout)
-    add_header(s3, "Fundamentación Matemática y NP-Completitud", "1. Marco Teórico", "Juan Kobashigawa", 3)
+    add_header(s3, "Fundamentación Matemática y NP-Completitud", "1. Marco Teórico", "Kobashigawa", 3)
 
     c3_1 = add_card(s3, 0.8, 1.45, 5.6, 5.4, "Demostración de Yato & Seta (2003)")
     tb3_1 = s3.shapes.add_textbox(Inches(1.05), Inches(2.1), Inches(5.1), Inches(4.5))
@@ -358,7 +358,7 @@ def build_presentation():
     # SLIDE 4: DATASET Y MODELADO TOPOLÓGICO (|V| = 2,401)
     # =========================================================================
     s4 = prs.slides.add_slide(blank_layout)
-    add_header(s4, "Dataset y Modelado del Grafo de 2,401 Nodos", "2. Dataset y Topología", "Juan Kobashigawa", 4)
+    add_header(s4, "Dataset y Modelado del Grafo de 2,401 Nodos", "2. Dataset y Topología", "Kobashigawa", 4)
 
     # Left card info & math
     c4_1 = add_card(s4, 0.8, 1.45, 5.4, 5.4, "Topología y Partición por Integrante")
@@ -370,9 +370,9 @@ def build_presentation():
         ("Instancia de Estudio:", " k = 7 → Tablero de N = 49 × 49 celdas."),
         ("Conjunto de Vértices V:", " |V| = N² = 49² = 2,401 nodos (Supera el mínimo de 1,500)."),
         ("Partición Individual (Rúbrica ≥ 500 c/u):", ""),
-        ("  • Kobashigawa Ugaz, J.:", " 800 nodos (Filas 0 a 15)"),
-        ("  • Pareja Calloapaza, M.:", " 801 nodos (Filas 16 a 32)"),
-        ("  • Riveros Mera, J.:", " 800 nodos (Filas 32 a 48)"),
+        ("  • Kobashigawa:", " 800 nodos (Filas 0 a 15)"),
+        ("  • Pareja:", " 801 nodos (Filas 16 a 32)"),
+        ("  • Riveros:", " 800 nodos (Filas 32 a 48)"),
         ("Grado Regular d(v):", " d(v) = 3N − 2k − 1 = 3(49) − 2(7) − 1 = 132 aristas/nodo."),
         ("Conjunto de Aristas E (Handshaking Lemma):", ""),
         ("  |E| = (|V| × d(v)) / 2 = (2,401 × 132) / 2 =", " 158,466 aristas.")
@@ -400,7 +400,7 @@ def build_presentation():
     # SLIDE 5: PROPUESTA ALGORÍTMICA EN 3 NIVELES
     # =========================================================================
     s5 = prs.slides.add_slide(blank_layout)
-    add_header(s5, "Estrategia de Resolución Progresiva en 3 Niveles", "3. Propuesta Algorítmica", "Marcelo Pareja", 5)
+    add_header(s5, "Estrategia de Resolución Progresiva en 3 Niveles", "3. Propuesta Algorítmica", "Pareja", 5)
 
     col_w = 3.65
     gap = 0.38
@@ -479,7 +479,7 @@ def build_presentation():
     # SLIDE 6: HEURÍSTICA MRV Y PRINCIPIO FAIL-FIRST
     # =========================================================================
     s6 = prs.slides.add_slide(blank_layout)
-    add_header(s6, "Heurística MRV y Principio de 'Fallar Primero'", "3. Heurística de Poda", "Marcelo Pareja", 6)
+    add_header(s6, "Heurística MRV y Principio de 'Fallar Primero'", "3. Heurística de Poda", "Pareja", 6)
 
     c6_1 = add_card(s6, 0.8, 1.45, 5.6, 5.4, "Formulación Matemática de MRV")
     tb6_1 = s6.shapes.add_textbox(Inches(1.05), Inches(2.1), Inches(5.1), Inches(4.5))
@@ -532,7 +532,7 @@ def build_presentation():
     # SLIDE 7: OPTIMIZACIÓN A BAJO NIVEL: BITMASKS EN O(1)
     # =========================================================================
     s7 = prs.slides.add_slide(blank_layout)
-    add_header(s7, "Optimización de Bajo Nivel: Bitmasks y Hardware POPCNT", "3. Aceleración por Hardware", "Marcelo Pareja", 7)
+    add_header(s7, "Optimización de Bajo Nivel: Bitmasks y Hardware POPCNT", "3. Aceleración por Hardware", "Pareja", 7)
 
     c7_1 = add_card(s7, 0.8, 1.45, 5.6, 5.4, "Lógica Binaria y Vectores de Bits")
     tb7_1 = s7.shapes.add_textbox(Inches(1.05), Inches(2.1), Inches(5.1), Inches(4.5))
@@ -588,7 +588,7 @@ def build_presentation():
     # SLIDE 8: ANÁLISIS ASINTÓTICO DE COMPLEJIDAD (BIG-O)
     # =========================================================================
     s8 = prs.slides.add_slide(blank_layout)
-    add_header(s8, "Análisis Asintótico de Complejidad Temporal y Espacial", "4. Análisis de Complejidad", "Marcelo Pareja", 8)
+    add_header(s8, "Análisis Asintótico de Complejidad Temporal y Espacial", "4. Análisis de Complejidad", "Pareja", 8)
 
     c8_1 = add_card(s8, 0.8, 1.45, 5.6, 5.4, "Complejidad Temporal Asintótica Big-O")
     tb8_1 = s8.shapes.add_textbox(Inches(1.05), Inches(2.1), Inches(5.1), Inches(4.5))
@@ -647,7 +647,7 @@ def build_presentation():
     # SLIDE 9: ARQUITECTURA DE SOFTWARE Y MODELADO UML
     # =========================================================================
     s9 = prs.slides.add_slide(blank_layout)
-    add_header(s9, "Arquitectura del Sistema y Diagrama de Clases UML", "4. Ingeniería de Software", "Jennifer Riveros", 9)
+    add_header(s9, "Arquitectura del Sistema y Diagrama de Clases UML", "4. Ingeniería de Software", "Riveros", 9)
 
     c9_1 = add_card(s9, 0.8, 1.45, 5.4, 5.4, "Patrón Arquitectónico Desacoplado MVC")
     tb9_1 = s9.shapes.add_textbox(Inches(1.05), Inches(2.05), Inches(4.9), Inches(4.6))
@@ -681,7 +681,7 @@ def build_presentation():
     # SLIDE 10: INTERFAZ GRÁFICA Y CASOS DE USO
     # =========================================================================
     s10 = prs.slides.add_slide(blank_layout)
-    add_header(s10, "Demostración de la Interfaz Gráfica y Casos de Uso", "4. Aplicativo Interactivo", "Jennifer Riveros", 10)
+    add_header(s10, "Demostración de la Interfaz Gráfica y Casos de Uso", "4. Aplicativo Interactivo", "Riveros", 10)
 
     c10_1 = add_card(s10, 0.8, 1.45, 5.4, 5.4, "Casos de Uso Principales (Roadmap)")
     tb10_1 = s10.shapes.add_textbox(Inches(1.05), Inches(2.05), Inches(4.9), Inches(4.6))
@@ -719,7 +719,7 @@ def build_presentation():
     # SLIDE 11: VALIDACIÓN EXPERIMENTAL Y BENCHMARKING (21 PISTAS)
     # =========================================================================
     s11 = prs.slides.add_slide(blank_layout)
-    add_header(s11, "Validación Experimental: Benchmarking de 21 Pistas", "5. Validación y Pruebas", "Jennifer Riveros", 11)
+    add_header(s11, "Validación Experimental: Benchmarking de 21 Pistas", "5. Validación y Pruebas", "Riveros", 11)
 
     # Table Card
     c11_table = add_card(s11, 0.8, 1.45, 11.733, 2.7, "Tabla 1: Comparativa de Rendimiento sobre Instancia de Alta Dificultad (21 Pistas)")
@@ -788,7 +788,7 @@ def build_presentation():
     # SLIDE 12: CONCLUSIONES Y TRABAJO FUTURO
     # =========================================================================
     s12 = prs.slides.add_slide(blank_layout)
-    add_header(s12, "Conclusiones del Proyecto y Proyección Académica", "6. Conclusiones", "Jennifer Riveros", 12)
+    add_header(s12, "Conclusiones del Proyecto y Proyección Académica", "6. Conclusiones", "Riveros", 12)
 
     c12_1 = add_card(s12, 0.8, 1.45, 11.733, 1.6, "1. Eficiencia y Escalabilidad del Modelado en Grafos", C_BORDER)
     tb12_1 = s12.shapes.add_textbox(Inches(1.05), Inches(1.95), Inches(11.2), Inches(1.0))

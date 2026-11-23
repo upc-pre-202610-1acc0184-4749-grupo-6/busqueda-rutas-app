@@ -14,15 +14,15 @@
 
 | Bloque | Ponente | Código | Diapositivas | Rol Técnico y Temas Clave | Tiempo Estimado |
 | :--- | :--- | :---: | :---: | :--- | :---: |
-| **Bloque 1** | **Juan Alejandro Kobashigawa Ugaz** | u202412921 | Diapositivas 1 a 4 | Portada, Problemática en la Industria, NP-Completitud (Yato & Seta) y Grafo de 2,401 nodos | 00:00 – 03:30 (3.5 min) |
-| **Bloque 2** | **Marcelo Fausto Pareja Calloapaza** | u202411627 | Diapositivas 5 a 8 | Propuesta en 3 Niveles, Heurística MRV (Fail-First), Bitmasks $O(1)$ con POPCNT y Análisis Big-O | 03:30 – 07:00 (3.5 min) |
-| **Bloque 3** | **Jennifer Yamilet Riveros Mera** | u20241c998 | Diapositivas 9 a 13 | Arquitectura MVC / UML, Demostración GUI Tkinter, Benchmarking (21 Pistas), Conclusiones y Cierre | 07:00 – 11:00 (4.0 min) |
+| **Bloque 1** | **Kobashigawa** | u202412921 | Diapositivas 1 a 4 | Portada, Problemática en la Industria, NP-Completitud (Yato & Seta) y Grafo de 2,401 nodos | 00:00 – 03:30 (3.5 min) |
+| **Bloque 2** | **Pareja** | u202411627 | Diapositivas 5 a 8 | Propuesta en 3 Niveles, Heurística MRV (Fail-First), Bitmasks $O(1)$ con POPCNT y Análisis Big-O | 03:30 – 07:00 (3.5 min) |
+| **Bloque 3** | **Riveros** | u20241c998 | Diapositivas 9 a 13 | Arquitectura MVC / UML, Demostración GUI Tkinter, Benchmarking (21 Pistas), Conclusiones y Cierre | 07:00 – 11:00 (4.0 min) |
 | **Defensa** | **Equipo Completo (Grupo 5)** | Todos | Diapositiva 13 | Ronda de Preguntas Técnicas Individuales del Docente | 11:00 – 15:00 (~4 min) |
 
 ---
 
 ## BLOQUE 1: FUNDAMENTACIÓN TEÓRICA, CONTEXTO Y MODELADO TOPOLÓGICO
-**Ponente:** Juan Alejandro Kobashigawa Ugaz (u202412921)  
+**Ponente:** Kobashigawa (u202412921)  
 **Tiempo Asignado:** 3 minutos y 30 segundos  
 **Diapositivas:** 1 a 4  
 
@@ -32,10 +32,10 @@
 *(Tiempo: 00:00 - 00:35)*  
 *(Indicación: Postura erguida, contacto visual directo con el profesor Soncco y la cámara/jurado. Tono seguro, profesional y pausado).*
 
-**Juan Kobashigawa:**  
+**Kobashigawa:**  
 > "Buenos días, estimado profesor José Luis Soncco y compañeros presentes.  
 > 
-> A nombre del Grupo 5, conformado por Marcelo Pareja, Jennifer Riveros y mi persona, Juan Kobashigawa, estudiantes de la carrera de Ingeniería de Software de la UPC, tenemos el agrado de presentar la sustentación del Segundo Hito (TB2) de nuestro proyecto de investigación aplicada en el curso de Complejidad Algorítmica.  
+> A nombre del Grupo 5, conformado por Pareja, Riveros y mi persona, Kobashigawa, estudiantes de la carrera de Ingeniería de Software de la UPC, tenemos el agrado de presentar la sustentación del Segundo Hito (TB2) de nuestro proyecto de investigación aplicada en el curso de Complejidad Algorítmica.  
 > 
 > Nuestro proyecto se titula: **'Resolución y Validación del Sudoku Generalizado $N \times N$ mediante Grafos de Restricciones y Búsqueda Informada'**.  
 > 
@@ -47,7 +47,7 @@
 *(Tiempo: 00:35 - 01:25)*  
 *(Indicación: Cambiar a Diapositiva 2. Señalar con el puntero la métrica $10^{4058}$).*
 
-**Juan Kobashigawa:**  
+**Kobashigawa:**  
 > "Iniciamos contextualizando la relevancia del problema.  
 > 
 > En la industria del software y el entretenimiento interactivo inteligente —como plataformas de videojuegos cognitivos del calibre de Nintendo Brain Age o las publicaciones de Nikoli— la generación y validación inmediata de tableros lógicos es un componente crítico.  
@@ -64,7 +64,7 @@
 *(Tiempo: 01:25 - 02:20)*  
 *(Indicación: Cambiar a Diapositiva 3. Mantener un tono riguroso al citar la literatura científica).*
 
-**Juan Kobashigawa:**  
+**Kobashigawa:**  
 > "Para fundamentar teóricamente esta problemática, nos remitimos al hito matemático establecido por **Yato y Seta en 2003**, quienes demostraron formalmente que determinar si una cuadrícula de Sudoku generalizado admite una solución válida pertenece a la clase de complejidad **NP-Completo**.  
 > 
 > Su demostración se basa en una reducción polinomial estricta desde el problema clásico de **Coloración de Vértices en Grafos (Graph Vertex Coloring)**:
@@ -86,15 +86,15 @@
 *(Tiempo: 02:20 - 03:30)*  
 *(Indicación: Cambiar a Diapositiva 4. Señalar la fórmula del Lema del Apretón de Manos y el gráfico de la derecha).*
 
-**Juan Kobashigawa:**  
+**Kobashigawa:**  
 > "Para materializar este marco, construimos un grafo de restricciones a escala masiva seleccionando la dimensión $k = 7$, correspondiente a un tablero de $N = 49 \times 49$.  
 > 
 > Como observan en la tarjeta izquierda:
 > - El número total de vértices es $|V| = N^2 = 49^2 = \mathbf{2,401\text{ nodos}}$, superando ampliamente el piso de 1,500 nodos exigido en la rúbrica del curso.
 > - Cumpliendo con el requerimiento de balance individual de al menos 500 nodos por integrante, particionamos el dataset de manera trazable:
 >   - Mi cuota asignada comprendió **800 nodos** (Filas 0 a 15),
->   - Marcelo Pareja cubrió **801 nodos** (Filas 16 a 32),
->   - Y Jennifer Riveros cubrió **800 nodos** (Filas 32 a 48).  
+>   - Pareja cubrió **801 nodos** (Filas 16 a 32),
+>   - Y Riveros cubrió **800 nodos** (Filas 32 a 48).  
 > 
 > A nivel estructural, este grafo es **regular**, lo que significa que cada vértice posee exactamente el mismo grado $d(v)$. Aplicando el principio de inclusión-exclusión:  
 > $d(v) = (N - 1) + (N - 1) + (k - 1)^2 = 3N - 2k - 1$  
@@ -105,12 +105,12 @@
 > 
 > En la Figura 1 a la derecha, apreciamos la renderización que realizamos en NetworkX y Matplotlib: a la izquierda, la red completa con su densidad característica; y a la derecha, el subgrafo inducido que evidencia la presencia de cliques completos $K_{49}$ en filas y columnas. Todo este modelo fue exportado en los archivos normalizados `sudoku_nodes.csv` y `sudoku_edges.csv`.  
 > 
-> Para explicar la formulación matemática de los algoritmos de resolución y la aceleración a nivel de registros de procesador, cedo la palabra a mi compañero Marcelo Pareja."
+> Para explicar la formulación matemática de los algoritmos de resolución y la aceleración a nivel de registros de procesador, cedo la palabra a mi compañero Pareja."
 
 ---
 
 ## BLOQUE 2: PROPUESTA ALGORÍTMICA, HEURÍSTICA MRV, BITMASKS Y ANÁLISIS BIG-O
-**Ponente:** Marcelo Fausto Pareja Calloapaza (u202411627)  
+**Ponente:** Pareja (u202411627)  
 **Tiempo Asignado:** 3 minutos y 30 segundos  
 **Diapositivas:** 5 a 8  
 
@@ -120,8 +120,8 @@
 *(Tiempo: 03:30 - 04:15)*  
 *(Indicación: Cambiar a Diapositiva 5. Saludar brevemente y señalar las tres columnas progresivas).*
 
-**Marcelo Pareja:**  
-> "Muchas gracias, Juan. Buenos días, profesor Soncco.  
+**Pareja:**  
+> "Muchas gracias, Kobashigawa. Buenos días, profesor Soncco.  
 > 
 > Siguiendo con la exposición, para abordar la resolución computacional del problema diseñamos e implementamos una estrategia progresiva estructurada en **tres niveles algorítmicos**, permitiendo aislar empíricamente el impacto de cada optimización:  
 > 
@@ -137,7 +137,7 @@
 *(Tiempo: 04:15 - 05:05)*  
 *(Indicación: Cambiar a Diapositiva 6. Enfatizar la fórmula matemática de la izquierda).*
 
-**Marcelo Pareja:**  
+**Pareja:**  
 > "Profundicemos en el fundamento matemático de la Heurística **MRV (Minimum Remaining Values)**, también conocida como la heurística de la 'Variable Más Restringida'.  
 > 
 > En cada paso de la recursión, en lugar de tomar la siguiente celda vacía según el orden de lectura, el algoritmo calcula el dominio de valores admisibles $D(v)$ para todas las celdas vacías y selecciona la variable óptima $v^*$ que minimiza dicho tamaño:  
@@ -157,7 +157,7 @@
 *(Tiempo: 05:05 - 06:00)*  
 *(Indicación: Cambiar a Diapositiva 7. Explicar con entusiasmo el código binario y la instrucción POPCNT).*
 
-**Marcelo Pareja:**  
+**Pareja:**  
 > "Si bien el Nivel 2 redujo drásticamente el espacio de búsqueda, el cálculo repetitivo de intersecciones de conjuntos generaba un cuello de botella por la constante oculta. Para erradicarlo, en el **Nivel 3** implementamos una aceleración directa por hardware mediante **Máscaras de Bits (Bitmasks)**.  
 > 
 > En lugar de manipular arreglos o `sets`, representamos el estado de restricciones en tres arreglos de enteros de $N$ bits: `row_masks`, `col_masks` y `box_masks`.  
@@ -181,7 +181,7 @@
 *(Tiempo: 06:00 - 07:00)*  
 *(Indicación: Cambiar a Diapositiva 8. Contrastar rigurosamente la tabla de complejidades temporales y espaciales).*
 
-**Marcelo Pareja:**  
+**Pareja:**  
 > "Aterricemos esto en el análisis asintótico formal de complejidad Big-O, tanto temporal como espacial.  
 > 
 > **En Complejidad Temporal:**
@@ -196,12 +196,12 @@
 >   Por ello, implementamos **Listas de Adyacencia sobre tablas hash (`set`)**, con un costo espacial óptimo de $O(|V| + |E|) \approx 160,867\text{ entradas}$, ocupando apenas **1.25 MB de memoria RAM**.
 > - Sumando la pila de llamadas del sistema (call stack), cuya profundidad máxima nunca excede la cantidad de celdas vacías ($D_{\text{max}} \le N^2$), la memoria total del solver se acota estrictamente en $S(N) = O(N^2)$, garantizando estabilidad absoluta y cero riesgo de desbordamiento de pila.  
 > 
-> Para exponer la arquitectura de software, la demostración de la interfaz gráfica y la validación experimental, cedo la palabra a mi compañera Jennifer Riveros."
+> Para exponer la arquitectura de software, la demostración de la interfaz gráfica y la validación experimental, cedo la palabra a mi compañera Riveros."
 
 ---
 
 ## BLOQUE 3: ARQUITECTURA SOFTWARE, INTERFAZ GRÁFICA, BENCHMARKING Y CONCLUSIONES
-**Ponente:** Jennifer Yamilet Riveros Mera (u20241c998)  
+**Ponente:** Riveros (u20241c998)  
 **Tiempo Asignado:** 4 minutos  
 **Diapositivas:** 9 a 13  
 
@@ -211,8 +211,8 @@
 *(Tiempo: 07:00 - 07:50)*  
 *(Indicación: Cambiar a Diapositiva 9. Saludar al profesor y explicar el diagrama de clases UML).*
 
-**Jennifer Riveros:**  
-> "Muchas gracias, Marcelo. Buenos días profesor Soncco y compañeros.  
+**Riveros:**  
+> "Muchas gracias, Pareja. Buenos días profesor Soncco y compañeros.  
 > 
 > Para asegurar que este motor algorítmico fuera escalable, mantenible y robusto, diseñamos la solución siguiendo principios de Ingeniería de Software bajo el patrón arquitectónico desacoplado **Modelo-Vista-Controlador (MVC)**, cumpliendo con los estándares internacionales IEEE 830 e ISO 29148.  
 > 
@@ -229,7 +229,7 @@
 *(Tiempo: 07:50 - 08:45)*  
 *(Indicación: Cambiar a Diapositiva 10. Señalar las capturas reales de la GUI en pantalla).*
 
-**Jennifer Riveros:**  
+**Riveros:**  
 > "Pasamos a describir el comportamiento operativo de la interfaz gráfica a través de sus casos de uso clave, cuyas capturas reales apreciamos en pantalla:  
 > 
 > - **CU-01 — Juego Manual y Verificación de Reglas:**  
@@ -248,7 +248,7 @@
 *(Tiempo: 08:45 - 09:45)*  
 *(Indicación: Cambiar a Diapositiva 11. Explicar los datos de la Tabla 1 con énfasis en las métricas).*
 
-**Jennifer Riveros:**  
+**Riveros:**  
 > "En esta diapositiva presentamos la evidencia experimental cuantitativa que valida las afirmaciones teóricas de nuestro informe.  
 > 
 > Sometimos los tres niveles algorítmicos a una prueba de estrés idéntica sobre una instancia de **alta dificultad de 21 pistas iniciales** (es decir, con 60 celdas vacías por resolver). La ejecución se realizó en un entorno controlado con procesador x86-64 y Python 3.12.  
@@ -269,7 +269,7 @@
 *(Tiempo: 09:45 - 10:30)*  
 *(Indicación: Cambiar a Diapositiva 12. Tono firme y concluyente).*
 
-**Jennifer Riveros:**  
+**Riveros:**  
 > "Para sintetizar nuestro trabajo del Segundo Hito, arribamos a tres conclusiones fundamentales:  
 > 
 > 1. **Eficacia y Escalabilidad del Modelado en Grafos:** Abstraer las restricciones del Sudoku a un grafo regular simple ($|V| = 2,401$ y $|E| = 158,466$ para $k=7$) mediante Listas de Adyacencia en conjuntos hash (`set`) permite verificar colisiones en tiempo $O(1)$ promedio consumiendo solo 1.25 MB de memoria RAM. Esto superó la ineficiencia de matrices densas y cumplió con creces las cuotas exigidas de más de 800 nodos por integrante.  
@@ -285,7 +285,7 @@
 *(Tiempo: 10:30 - 11:00)*  
 *(Indicación: Cambiar a Diapositiva 13. Invitar al equipo a encender micrófonos/cámaras y abrir la ronda de preguntas).*
 
-**Jennifer Riveros:**  
+**Riveros:**  
 > "Ponemos a disposición de la cátedra el repositorio oficial en GitHub con todo el código fuente modular, los datasets generados, la suite de pruebas unitarias automatizadas con 100% de cobertura y la documentación técnica completa.  
 > 
 > Agradecemos sinceramente la atención del profesor José Luis Soncco Alvarez y de los presentes. Quedamos a su entera disposición para responder a las preguntas que estime pertinentes.  
@@ -300,10 +300,10 @@ A continuación se detallan las respuestas modelo ante las preguntas técnicas m
 
 ---
 
-### PREGUNTA 1 (Dirigida a Juan Kobashigawa):
+### PREGUNTA 1 (Dirigida a Kobashigawa):
 **Docente:** *"En la Diapositiva 4 ustedes afirman que el grafo tiene 158,466 aristas. ¿Cómo demuestran matemáticamente que ese número es exacto y no contiene aristas duplicadas ni faltantes?"*
 
-**Respuesta de Juan Kobashigawa:**  
+**Respuesta de Kobashigawa:**  
 > "Profesor Soncco, la demostración se fundamenta en el **Lema del Apretón de Manos (Handshaking Lemma)** de la teoría de grafos, el cual postula que para todo grafo no dirigido simple, la suma de los grados de todos los vértices es exactamente igual al doble del número de aristas:  
 > $\sum_{v \in V} d(v) = 2|E|$  
 > 
@@ -315,10 +315,10 @@ A continuación se detallan las respuestas modelo ante las preguntas técnicas m
 
 ---
 
-### PREGUNTA 2 (Dirigida a Marcelo Pareja):
+### PREGUNTA 2 (Dirigida a Pareja):
 **Docente:** *"¿Por qué afirman que la heurística MRV reduce la complejidad práctica sin comprometer la completitud del algoritmo? ¿Existe algún caso donde MRV no encuentre solución si esta existe?"*
 
-**Respuesta de Marcelo Pareja:**  
+**Respuesta de Pareja:**  
 > "No, profesor Soncco. La heurística MRV pertenece a la familia de algoritmos de **búsqueda sistemática exacta y completa**.  
 > 
 > MRV modifica exclusivamente el **orden de selección de las variables** (qué celda evaluar primero en el árbol de recursión), pero no poda ninguna rama que contenga una asignación potencialmente válida.  
@@ -329,10 +329,10 @@ A continuación se detallan las respuestas modelo ante las preguntas técnicas m
 
 ---
 
-### PREGUNTA 3 (Dirigida a Marcelo Pareja):
+### PREGUNTA 3 (Dirigida a Pareja):
 **Docente:** *"Explique con mayor detalle cómo funciona la instrucción POPCNT en el Nivel 3. ¿Cómo una función de Python como `int.bit_count()` logra ejecutarse en $O(1)$ de hardware?"*
 
-**Respuesta de Marcelo Pareja:**  
+**Respuesta de Pareja:**  
 > "En Python 3.10 en adelante, la biblioteca estándar introdujo el método `int.bit_count()` implementado en C a bajo nivel en la máquina virtual CPython.  
 > 
 > Cuando este código es compilado y ejecutado en procesadores modernos que soportan el set de instrucciones **SSE4.2 en arquitectura x86-64** (o la extensión NEON en ARM), CPython utiliza la función intrínseca `__builtin_popcount` del compilador GCC o MSVC. Esto emite directamente el opcode binario de la instrucción de hardware **`POPCNT`**.  
@@ -343,10 +343,10 @@ A continuación se detallan las respuestas modelo ante las preguntas técnicas m
 
 ---
 
-### PREGUNTA 4 (Dirigida a Jennifer Riveros):
+### PREGUNTA 4 (Dirigida a Riveros):
 **Docente:** *"En la Tabla 1 de resultados, ¿por qué los retrocesos del Nivel 2 y del Nivel 3 son exactamente idénticos (14,672 backtracks), pero el tiempo baja de 3,571 ms a 147 ms?"*
 
-**Respuesta de Jennifer Riveros:**  
+**Respuesta de Riveros:**  
 > "Ese resultado es precisamente la mayor prueba de rigor científico de nuestra investigación, profesor Soncco.  
 > 
 > Demuestra que el **Nivel 2 y el Nivel 3 recorren exactamente el mismo árbol de búsqueda**. Ambos algoritmos toman idénticas decisiones heurísticas y evalúan las celdas en el mismo orden lógico porque ambos implementan la heurística MRV. Por ello, la cantidad de decisiones y retrocesos es idéntica: exactamente 14,672.  
@@ -361,11 +361,11 @@ A continuación se detallan las respuestas modelo ante las preguntas técnicas m
 ### PREGUNTA 5 (Dirigida a todo el equipo o individual):
 **Docente:** *"¿Cómo garantizaron que el trabajo fuera distribuido equitativamente entre los tres miembros del equipo y cómo se evidencia esto en el código?"*
 
-**Respuesta conjunta (o por Juan / Jennifer):**  
+**Respuesta conjunta:**  
 > "Profesor, el trabajo se planificó y ejecutó de manera estrictamente modular y colaborativa a través de GitHub:  
-> - **Juan Kobashigawa** lideró la fundamentación teórica, la revisión de literatura sobre NP-completitud, la formulación matemática del grafo y la partición individual del dataset, responsabilizándose de los primeros 800 nodos en `sudoku_nodes.csv` y la generación de la Figura 1.  
-> - **Marcelo Pareja** se encargó del diseño y optimización del motor algorítmico en `src/solver.py`, desarrollando los tres niveles (DFS, MRV y Bitmasks O(1)) y realizando las demostraciones asintóticas Big-O temporales y espaciales.  
-> - **Jennifer Riveros** lideró el diseño de la arquitectura de software MVC, el modelado del diagrama de clases UML, el desarrollo integral de la interfaz gráfica interactiva en `src/main.py`, la suite de pruebas unitarias automatizadas (`tests/test_model.py`) y el protocolo de benchmarking experimental.  
+> - **Kobashigawa** lideró la fundamentación teórica, la revisión de literatura sobre NP-completitud, la formulación matemática del grafo y la partición individual del dataset, responsabilizándose de los primeros 800 nodos en `sudoku_nodes.csv` y la generación de la Figura 1.  
+> - **Pareja** se encargó del diseño y optimización del motor algorítmico en `src/solver.py`, desarrollando los tres niveles (DFS, MRV y Bitmasks O(1)) y realizando las demostraciones asintóticas Big-O temporales y espaciales.  
+> - **Riveros** lideró el diseño de la arquitectura de software MVC, el modelado del diagrama de clases UML, el desarrollo integral de la interfaz gráfica interactiva en `src/main.py`, la suite de pruebas unitarias automatizadas (`tests/test_model.py`) y el protocolo de benchmarking experimental.  
 > 
 > Esta distribución se encuentra reflejada con total transparencia en el historial de commits y branches de nuestro repositorio oficial de GitHub."
 
