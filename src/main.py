@@ -1102,8 +1102,8 @@ def open_massive_49x49_inspector():
     sel_row = tk.Frame(card_solver, bg=C_CARD)
     sel_row.pack(fill=tk.X, pady=3)
 
-    diff_49_val = ["Fácil (10% Vacío - ~240 celdas)", "Medio (20% Vacío - ~480 celdas)", "Difícil (30% Vacío - ~720 celdas)", "Experto (40% Vacío - ~960 celdas)"]
-    diff_49_var = tk.StringVar(value=diff_49_val[1])
+    diff_49_val = ["Fácil (15% Vacío - ~360 celdas)", "Medio (25% Vacío - ~600 celdas)", "Difícil (30% Vacío - ~720 celdas)", "Experto (34% Vacío - ~816 celdas)"]
+    diff_49_var = tk.StringVar(value=diff_49_val[2])  # Default: Difícil (30% Vacío)
     tk.Label(sel_row, text="Dificultad:", font=("Segoe UI", 8), bg=C_CARD, fg=C_TEXT_MAIN).pack(side=tk.LEFT)
     diff_opt = tk.OptionMenu(sel_row, diff_49_var, *diff_49_val)
     diff_opt.config(font=("Segoe UI", 7), bg=C_CARD, highlightthickness=0)
@@ -1297,16 +1297,16 @@ def open_massive_49x49_inspector():
     # 4. Generar Puzzle 49x49
     def generate_puzzle_49():
         diff_str = diff_49_var.get()
-        if "10%" in diff_str:
-            pct = 0.10
-        elif "20%" in diff_str:
-            pct = 0.20
+        if "15%" in diff_str:
+            pct = 0.15
+        elif "25%" in diff_str:
+            pct = 0.25
         elif "30%" in diff_str:
             pct = 0.30
-        elif "40%" in diff_str:
-            pct = 0.40
+        elif "34%" in diff_str:
+            pct = 0.34
         else:
-            pct = 0.20
+            pct = 0.30
 
         num_empty = int(2401 * pct)
         log(f"\n--- GENERANDO NUEVO PUZZLE 49×49 ({int(pct*100)}% VACÍO) ---")
@@ -1372,18 +1372,29 @@ def open_massive_49x49_inspector():
         lbl_time_met.config(text="Tiempo: Calculando...")
         insp_window.update_idletasks()
 
-        def _worker_solver():
-            solver = SudokuSolver(board_49_state["current"], k=7)
-            t0 = time.perf_counter()
-            if "Nivel 3" in algo_choice or "Bitmasks" in algo_choice:
-                success, solved_board, metrics = solver.resolver_mrv_bitmasks()
-            elif "Nivel 2" in algo_choice or "MRV Clásico" in algo_choice:
-                success, solved_board, metrics = solver.resolver_mrv_clasico()
-            else:
-                success, solved_board, metrics = solver.resolver_basico()
-            t1 = time.perf_counter()
+        def _on_solve_error(err_msg):
+            btn_sol.config(state="normal", text="⚡ Resolver con Algoritmo")
+            btn_gen.config(state="normal")
+            state_badge_var.set("ERROR")
+            lbl_state_badge.config(fg=C_RED_BD)
+            log(f"❌ Error durante la ejecución del solver: {err_msg}")
+            messagebox.showerror("Error en Solver", f"Ocurrió un error en el motor de resolución:\n{err_msg}", parent=insp_window)
 
-            insp_window.after(0, lambda: _on_solve_finished(success, solved_board, metrics))
+        def _worker_solver():
+            try:
+                solver = SudokuSolver(board_49_state["current"], k=7, max_nodes=200000)
+                t0 = time.perf_counter()
+                if "Nivel 3" in algo_choice or "Bitmasks" in algo_choice:
+                    success, solved_board, metrics = solver.resolver_mrv_bitmasks()
+                elif "Nivel 2" in algo_choice or "MRV Clásico" in algo_choice:
+                    success, solved_board, metrics = solver.resolver_mrv_clasico()
+                else:
+                    success, solved_board, metrics = solver.resolver_basico()
+                t1 = time.perf_counter()
+
+                insp_window.after(0, lambda: _on_solve_finished(success, solved_board, metrics))
+            except Exception as ex:
+                insp_window.after(0, lambda: _on_solve_error(str(ex)))
 
         def _on_solve_finished(success, solved_board, metrics):
             btn_sol.config(state="normal", text="⚡ Resolver con Algoritmo")
@@ -1430,10 +1441,21 @@ def open_massive_49x49_inspector():
                     parent=insp_window
                 )
             else:
-                state_badge_var.set("ERROR / SIN SOLUCIÓN")
+                state_badge_var.set("LÍMITE ALCANZADO")
                 lbl_state_badge.config(fg=C_RED_BD)
-                log("❌ No se encontró solución válida para la configuración actual.")
-                messagebox.showerror("Error", "No se encontró solución válida para el tablero actual.", parent=insp_window)
+                lbl_time_met.config(text=f"Tiempo: {metrics['tiempo_ms']:.2f} ms")
+                lbl_back_met.config(text=f"Backtracks: {metrics['backtracks']:,}")
+                lbl_nodes_met.config(text=f"Nodos: {metrics['nodos_explorados']:,}")
+                log(f"⚠️ Límite de exploración alcanzado ({metrics['nodos_explorados']:,} nodos).")
+                log("   El problema presenta alta combinatoria para esta estrategia.")
+                log("   Recomendación: Usa Nivel 3 (Bitmasks O(1)) con Dificultad Difícil o Media.")
+                messagebox.showwarning(
+                    "Límite de Búsqueda", 
+                    f"Se alcanzó el límite de seguridad de exploración ({metrics['nodos_explorados']:,} nodos en {metrics['tiempo_ms']:.1f} ms).\n\n"
+                    f"La combinatoria de esta configuración requiere poda más agresiva.\n"
+                    f"Prueba con Nivel 3 (MRV + Bitmasks O(1)) y dificultad Difícil o Media.",
+                    parent=insp_window
+                )
 
         threading.Thread(target=_worker_solver, daemon=True).start()
 

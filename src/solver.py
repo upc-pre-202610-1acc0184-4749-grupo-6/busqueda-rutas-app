@@ -17,7 +17,7 @@ from typing import List, Tuple, Optional, Dict
 
 
 class SudokuSolver:
-    def __init__(self, board: List[List[int]], k: int = 3):
+    def __init__(self, board: List[List[int]], k: int = 3, max_nodes: int = 200000):
         """
         Inicializa el resolutor para un tablero generalizado de orden k.
         Dimensiones: N x N donde N = k^2.
@@ -26,6 +26,7 @@ class SudokuSolver:
         self.k = k
         self.N = k * k
         self.board = [row[:] for row in board]
+        self.max_nodes = max_nodes
         
         # Métricas de rendimiento
         self.backtracks = 0
@@ -96,6 +97,9 @@ class SudokuSolver:
         return None
 
     def _backtrack_basico(self, board: List[List[int]]) -> bool:
+        if self.nodes_explored >= self.max_nodes:
+            return False
+
         celda = self._encontrar_vacia_secuencial(board)
         if celda is None:
             return True  # Tablero completo
@@ -170,6 +174,9 @@ class SudokuSolver:
         return mejor_celda
 
     def _backtrack_mrv_clasico(self, board: List[List[int]]) -> bool:
+        if self.nodes_explored >= self.max_nodes:
+            return False
+
         celda = self._encontrar_celda_mrv_clasica(board)
         if celda is None:
             return True  # Tablero completo
@@ -240,6 +247,9 @@ class SudokuSolver:
         return exito, tablero, metricas
 
     def _backtrack_mrv_bitmasks_core(self, board, empty_cells, row_masks, col_masks, box_masks, all_mask) -> bool:
+        if self.nodes_explored >= self.max_nodes:
+            return False
+
         if not empty_cells:
             return True
 
