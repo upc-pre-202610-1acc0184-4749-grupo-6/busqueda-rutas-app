@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import time
+import threading
 
 from solver import SudokuSolver
 from model import ConstraintGraph, SudokuBoard
@@ -1363,60 +1364,78 @@ def open_massive_49x49_inspector():
         log(f"\n--- EJECUTANDO SOLVER CSP SOBRE 49×49 ({num_empty} CELDAS VACÍAS) ---")
         log(f"• Estrategia seleccionada: {algo_choice}")
 
-        solver = SudokuSolver(board_49_state["current"], k=7)
+        # Indicador visual inmediato para mantener la interfaz 100% responsiva
+        btn_sol.config(state="disabled", text="⏳ Resolviendo...")
+        btn_gen.config(state="disabled")
+        state_badge_var.set("⏳ RESOLVIENDO...")
+        lbl_state_badge.config(fg="#D97706")
+        lbl_time_met.config(text="Tiempo: Calculando...")
+        insp_window.update_idletasks()
 
-        t0 = time.perf_counter()
-        if "Nivel 3" in algo_choice or "Bitmasks" in algo_choice:
-            success, solved_board, metrics = solver.resolver_mrv_bitmasks()
-        elif "Nivel 2" in algo_choice or "MRV Clásico" in algo_choice:
-            success, solved_board, metrics = solver.resolver_mrv_clasico()
-        else:
-            success, solved_board, metrics = solver.resolver_basico()
-        t1 = time.perf_counter()
+        def _worker_solver():
+            solver = SudokuSolver(board_49_state["current"], k=7)
+            t0 = time.perf_counter()
+            if "Nivel 3" in algo_choice or "Bitmasks" in algo_choice:
+                success, solved_board, metrics = solver.resolver_mrv_bitmasks()
+            elif "Nivel 2" in algo_choice or "MRV Clásico" in algo_choice:
+                success, solved_board, metrics = solver.resolver_mrv_clasico()
+            else:
+                success, solved_board, metrics = solver.resolver_basico()
+            t1 = time.perf_counter()
 
-        if success:
-            board_49_state["current"] = solved_board
-            solved_now = set(board_49_state["empty_cells"])
-            board_49_state["solved_cells"] = solved_now
-            board_49_state["empty_cells"] = set()
+            insp_window.after(0, lambda: _on_solve_finished(success, solved_board, metrics))
 
-            # Color newly solved cells with the official lavender color
-            for r, c in solved_now:
-                canvas.itemconfig(cells[(r, c)], fill=C_PURPLE_LIGHT, outline=C_PRIMARY, width=1)
+        def _on_solve_finished(success, solved_board, metrics):
+            btn_sol.config(state="normal", text="⚡ Resolver con Algoritmo")
+            btn_gen.config(state="normal")
 
-            state_badge_var.set("ESTADO: RESUELTO (100%)")
-            lbl_state_badge.config(fg=C_GREEN)
-            lbl_time_met.config(text=f"Tiempo: {metrics['tiempo_ms']:.2f} ms")
-            lbl_back_met.config(text=f"Backtracks: {metrics['backtracks']:,}")
-            lbl_nodes_met.config(text=f"Nodos: {metrics['nodos_explorados']:,}")
+            if success:
+                board_49_state["current"] = solved_board
+                solved_now = set(board_49_state["empty_cells"])
+                board_49_state["solved_cells"] = solved_now
+                board_49_state["empty_cells"] = set()
 
-            if current_selection["selected"]:
-                sr, sc = current_selection["selected"]
-                update_zoom_grid(sr, sc)
+                # Color newly solved cells with the official lavender color
+                for r, c in solved_now:
+                    canvas.itemconfig(cells[(r, c)], fill=C_PURPLE_LIGHT, outline=C_PRIMARY, width=1)
 
-            log("======================================================================")
-            log(f"✓ {metrics['estrategia'].upper()} FINALIZADO CON ÉXITO")
-            log(f"  • Tiempo de CPU: {metrics['tiempo_ms']:.2f} ms")
-            log(f"  • Retrocesos (Backtracking): {metrics['backtracks']:,}")
-            log(f"  • Nodos explorados en árbol CSP: {metrics['nodos_explorados']:,}")
-            log(f"  • Celdas resueltas: {len(solved_now):,} ({len(solved_now)/2401*100:.1f}% del grafo)")
-            log("  ✓ Solución 100% legal: Cero conflictos en 158,466 aristas.")
-            log("======================================================================")
+                state_badge_var.set("ESTADO: RESUELTO (100%)")
+                lbl_state_badge.config(fg=C_GREEN)
+                lbl_time_met.config(text=f"Tiempo: {metrics['tiempo_ms']:.2f} ms")
+                lbl_back_met.config(text=f"Backtracks: {metrics['backtracks']:,}")
+                lbl_nodes_met.config(text=f"Nodos: {metrics['nodos_explorados']:,}")
 
-            messagebox.showinfo(
-                "Resolución Exitosa", 
-                f"¡Sudoku Masivo 49x49 resuelto con éxito!\n\n"
-                f"• Algoritmo: {metrics['estrategia']}\n"
-                f"• Tiempo de resolución: {metrics['tiempo_ms']:.2f} ms\n"
-                f"• Celdas completadas: {len(solved_now):,}\n"
-                f"• Retrocesos (Backtracks): {metrics['backtracks']:,}\n"
-                f"• Nodos explorados: {metrics['nodos_explorados']:,}\n\n"
-                f"Celdas resueltas resaltadas en color lavanda ({C_PURPLE_LIGHT}).",
-                parent=insp_window
-            )
-        else:
-            log("❌ No se encontró solución válida para la configuración actual.")
-            messagebox.showerror("Error", "No se encontró solución válida para el tablero actual.", parent=insp_window)
+                if current_selection["selected"]:
+                    sr, sc = current_selection["selected"]
+                    update_zoom_grid(sr, sc)
+
+                log("======================================================================")
+                log(f"✓ {metrics['estrategia'].upper()} FINALIZADO CON ÉXITO")
+                log(f"  • Tiempo de CPU: {metrics['tiempo_ms']:.2f} ms")
+                log(f"  • Retrocesos (Backtracking): {metrics['backtracks']:,}")
+                log(f"  • Nodos explorados en árbol CSP: {metrics['nodos_explorados']:,}")
+                log(f"  • Celdas resueltas: {len(solved_now):,} ({len(solved_now)/2401*100:.1f}% del grafo)")
+                log("  ✓ Solución 100% legal: Cero conflictos en 158,466 aristas.")
+                log("======================================================================")
+
+                messagebox.showinfo(
+                    "Resolución Exitosa", 
+                    f"¡Sudoku Masivo 49x49 resuelto con éxito!\n\n"
+                    f"• Algoritmo: {metrics['estrategia']}\n"
+                    f"• Tiempo de resolución: {metrics['tiempo_ms']:.2f} ms\n"
+                    f"• Celdas completadas: {len(solved_now):,}\n"
+                    f"• Retrocesos (Backtracks): {metrics['backtracks']:,}\n"
+                    f"• Nodos explorados: {metrics['nodos_explorados']:,}\n\n"
+                    f"Celdas resueltas resaltadas en color lavanda ({C_PURPLE_LIGHT}).",
+                    parent=insp_window
+                )
+            else:
+                state_badge_var.set("ERROR / SIN SOLUCIÓN")
+                lbl_state_badge.config(fg=C_RED_BD)
+                log("❌ No se encontró solución válida para la configuración actual.")
+                messagebox.showerror("Error", "No se encontró solución válida para el tablero actual.", parent=insp_window)
+
+        threading.Thread(target=_worker_solver, daemon=True).start()
 
     # Botones del Motor de Resolución
     btn_gen = tk.Button(
@@ -1643,10 +1662,9 @@ DifficultyEntry.pack(side=LEFT)
 AlgorithmFrame = Frame(SelectionFrame)
 AlgorithmFrame.pack(side=LEFT)
 
-AlgorithmVal = ["Nivel 1: Básico (DFS)", "Nivel 2: MRV Clásico", "Nivel 3: MRV + Bitmasks O(1)"]
+AlgorithmVal = ["Nivel 3: MRV + Bitmasks O(1)", "Nivel 2: MRV Clásico", "Nivel 1: Básico (DFS)"]
 AlgorithmVar = StringVar()
-AlgorithmVar.set(AlgorithmVal[0])
-AlgorithmVar.set(list(AlgorithmVal)[0])  # Set the default value
+AlgorithmVar.set(AlgorithmVal[0])  # Set default to Nivel 3: MRV + Bitmasks O(1)
 
 AlgorithmLabel = Label(AlgorithmFrame, text="Algoritmo:", font=("Courier New", 12))
 AlgorithmLabel.pack(side=LEFT)
