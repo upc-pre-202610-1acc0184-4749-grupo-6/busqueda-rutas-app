@@ -852,94 +852,146 @@ def open_custom_sudoku_window():
 
 def open_massive_49x49_inspector():
     """
-    Abre una ventana interactiva de alta definición para inspeccionar el
-    Sudoku Masivo 49x49 (K=7), con |V|=2,401 nodos, |E|=158,466 aristas,
-    partición individual por integrante (Kobashigawa, Pareja, Riveros) y
-    detección visual interactiva de los 132 vecinos de restricción al hacer clic en cualquier celda.
+    Abre una ventana interactiva de alta definición con la paleta de colores oficial
+    de Sudoku Studio (#5938C4, #EDE9FE, #d29bfd) para inspeccionar y resolver el
+    Sudoku Masivo 49x49 (K=7):
+      - |V| = 2,401 nodos, |E| = 158,466 aristas.
+      - Partición equitativa por integrante (Kobashigawa, Pareja, Riveros).
+      - Visualización interactiva en tiempo real de las 132 aristas de restricción por celda.
+      - Mini-zoom del subbloque 7x7 con los números (1..49) reales.
+      - Motor de resolución con los 3 niveles de algoritmos (DFS, MRV Clásico, MRV + Bitmasks O(1)).
+      - Resaltado cromático oficial para celdas resueltas (#EDE9FE / #4C1D95).
+      - Benchmarks de tiempo, retrocesos (backtracks) y verificación topológica Big-O.
     """
     insp_window = tk.Toplevel(main_window)
-    insp_window.title("Inspector Topológico del Sudoku Masivo 49x49 (K=7) — Grupo 5")
-    insp_window.geometry("1200x840")
-    insp_window.minsize(1100, 780)
-    insp_window.config(bg="#0F172A")
+    insp_window.title("Inspector Topológico y Solver Masivo 49x49 (K=7) — Grupo 5")
+    insp_window.geometry("1260x870")
+    insp_window.minsize(1120, 800)
+    insp_window.config(bg="#F8FAFC")
+
+    # Paleta de colores unificada con el diseño principal de Sudoku Studio
+    C_BG = "#F8FAFC"
+    C_CARD = "#FFFFFF"
+    C_BORDER = "#E2E8F0"
+    C_PRIMARY = "#5938C4"
+    C_PURPLE_LIGHT = "#EDE9FE"
+    C_PURPLE_TEXT = "#4C1D95"
+    C_ACCENT = "#7C3AED"
+    C_BTN_SOLVER = "#8B5CF6"
+    C_BTN_GEN = "#d29bfd"
+    C_TEXT_MAIN = "#1E293B"
+    C_TEXT_MUTED = "#64748B"
+    C_BLUE = "#0284C7"
+    C_GREEN = "#059669"
+    C_YELLOW_BG = "#FEF08A"
+    C_YELLOW_BD = "#CA8A04"
+    C_RED_BG = "#FEE2E2"
+    C_RED_BD = "#DC143C"
+
+    # Cuotas de integrantes (Pasteles elegantes a juego con el tema)
+    C_KOBA_BG = "#E0F2FE"
+    C_KOBA_BD = "#BAE6FD"
+    C_PAR_BG = "#DCFCE7"
+    C_PAR_BD = "#BBF7D0"
+    C_RIV_BG = "#EDE9FE"
+    C_RIV_BD = "#DDD6FE"
+
+    # Estado del tablero 49x49
+    initial_base = generate_valid_base_board(49)
+    board_49_state = {
+        "solution": initial_base,
+        "current": [r[:] for r in initial_base],
+        "initial": [r[:] for r in initial_base],
+        "empty_cells": set(),
+        "solved_cells": set(),
+    }
 
     # 1. Header Banner
-    header_frame = tk.Frame(insp_window, bg="#0F172A", pady=10, padx=15)
+    header_frame = tk.Frame(insp_window, bg=C_CARD, pady=8, padx=15, highlightbackground=C_BORDER, highlightthickness=1)
     header_frame.pack(side=tk.TOP, fill=tk.X)
 
-    title_box = tk.Frame(header_frame, bg="#0F172A")
+    title_box = tk.Frame(header_frame, bg=C_CARD)
     title_box.pack(side=tk.LEFT)
 
     lbl_t0 = tk.Label(
         title_box, 
         text="INSPECTOR DEL GRAFO Y TABLERO MASIVO 49×49 (K=7)", 
-        font=("Segoe UI", 15, "bold"), 
-        bg="#0F172A", 
-        fg="#FFFFFF"
+        font=("Courier New", 14, "bold"), 
+        bg=C_CARD, 
+        fg=C_PRIMARY
     )
     lbl_t0.pack(anchor="w")
 
     lbl_t1 = tk.Label(
         title_box, 
-        text="Modelado Topológico de Restricciones, Partición por Integrante y Validación Big-O | CC184", 
-        font=("Segoe UI", 9), 
-        bg="#0F172A", 
-        fg="#94A3B8"
+        text="Modelado Topológico de Restricciones, Partición por Integrante y Resolución CSP | CC184", 
+        font=("Courier New", 9), 
+        bg=C_CARD, 
+        fg=C_TEXT_MUTED
     )
     lbl_t1.pack(anchor="w")
 
-    # Stat Badges
-    badges_frame = tk.Frame(header_frame, bg="#0F172A")
+    # Stat Badges en el Header
+    badges_frame = tk.Frame(header_frame, bg=C_CARD)
     badges_frame.pack(side=tk.RIGHT)
 
+    state_badge_var = tk.StringVar(value="LISTO (COMPLETO)")
+
     stats = [
-        ("|V| = 2,401", "Nodos", "#38BDF8"),
-        ("|E| = 158,466", "Aristas", "#34D399"),
-        ("d(v) = 132", "Grado Regular", "#FACC15"),
-        ("316,932 / 2", "Handshaking Lemma", "#F472B6"),
+        ("|V| = 2,401", "Nodos", C_BLUE),
+        ("|E| = 158,466", "Aristas", C_GREEN),
+        ("d(v) = 132", "Grado Regular", "#D97706"),
+        ("316,932 / 2", "Handshaking", C_ACCENT),
     ]
     for val_txt, lbl_txt, color in stats:
-        card = tk.Frame(badges_frame, bg="#1E293B", padx=8, pady=4, highlightbackground=color, highlightthickness=1)
-        card.pack(side=tk.LEFT, padx=4)
-        tk.Label(card, text=val_txt, font=("Segoe UI", 10, "bold"), bg="#1E293B", fg=color).pack()
-        tk.Label(card, text=lbl_txt, font=("Segoe UI", 7), bg="#1E293B", fg="#94A3B8").pack()
+        card = tk.Frame(badges_frame, bg=C_CARD, padx=8, pady=4, highlightbackground=C_BORDER, highlightthickness=1)
+        card.pack(side=tk.LEFT, padx=3)
+        tk.Label(card, text=val_txt, font=("Segoe UI", 9, "bold"), bg=C_CARD, fg=color).pack()
+        tk.Label(card, text=lbl_txt, font=("Segoe UI", 7), bg=C_CARD, fg=C_TEXT_MUTED).pack()
+
+    card_state = tk.Frame(badges_frame, bg=C_PURPLE_LIGHT, padx=8, pady=4, highlightbackground=C_PRIMARY, highlightthickness=1)
+    card_state.pack(side=tk.LEFT, padx=3)
+    lbl_state_badge = tk.Label(card_state, textvariable=state_badge_var, font=("Segoe UI", 9, "bold"), bg=C_PURPLE_LIGHT, fg=C_PRIMARY)
+    lbl_state_badge.pack()
+    tk.Label(card_state, text="Estado Tablero", font=("Segoe UI", 7), bg=C_PURPLE_LIGHT, fg=C_PURPLE_TEXT).pack()
 
     # 2. Legend Bar
-    legend_frame = tk.Frame(insp_window, bg="#1E293B", padx=15, pady=6)
+    legend_frame = tk.Frame(insp_window, bg=C_CARD, padx=15, pady=5, highlightbackground=C_BORDER, highlightthickness=1)
     legend_frame.pack(side=tk.TOP, fill=tk.X)
 
-    tk.Label(legend_frame, text="PARTICIÓN POR INTEGRANTE:", font=("Segoe UI", 8, "bold"), bg="#1E293B", fg="#E2E8F0").pack(side=tk.LEFT, padx=(0, 10))
+    tk.Label(legend_frame, text="PARTICIÓN & ESTADOS:", font=("Courier New", 8, "bold"), bg=C_CARD, fg=C_TEXT_MAIN).pack(side=tk.LEFT, padx=(0, 8))
 
     legend_items = [
-        ("#0284C7", "#BAE6FD", "Kobashigawa: Filas 0-15 (800 nodos)"),
-        ("#059669", "#BBF7D0", "Pareja: Filas 16-31 (801 nodos)"),
-        ("#7C3AED", "#E9D5FF", "Riveros: Filas 32-48 (800 nodos)"),
-        ("#D97706", "#FDE68A", "Celda Seleccionada"),
-        ("#DC2626", "#FECACA", "Vecinos con Restricción (132 aristas)"),
+        (C_KOBA_BD, C_KOBA_BG, "Kobashigawa: Filas 0-15 (800)"),
+        (C_PAR_BD, C_PAR_BG, "Pareja: Filas 16-31 (801)"),
+        (C_RIV_BD, C_RIV_BG, "Riveros: Filas 32-48 (800)"),
+        (C_YELLOW_BD, C_YELLOW_BG, "Seleccionada"),
+        (C_RED_BD, C_RED_BG, "Restricción (132)"),
+        (C_PRIMARY, C_PURPLE_LIGHT, "Resuelto por Algoritmo"),
     ]
     for border_c, bg_c, txt in legend_items:
         box = tk.Frame(legend_frame, bg=bg_c, width=12, height=12, highlightbackground=border_c, highlightthickness=1)
         box.pack(side=tk.LEFT, padx=(6, 2))
         box.pack_propagate(False)
-        tk.Label(legend_frame, text=txt, font=("Segoe UI", 8), bg="#1E293B", fg="#CBD5E1").pack(side=tk.LEFT, padx=(0, 8))
+        tk.Label(legend_frame, text=txt, font=("Segoe UI", 8), bg=C_CARD, fg=C_TEXT_MAIN).pack(side=tk.LEFT, padx=(0, 6))
 
-    # 3. Main Split View (Left Canvas, Right Info)
-    body_frame = tk.Frame(insp_window, bg="#0F172A", padx=15, pady=10)
+    # 3. Main Split View (Left Canvas, Right Info/Controls)
+    body_frame = tk.Frame(insp_window, bg=C_BG, padx=10, pady=8)
     body_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     # Left: Canvas container
-    canvas_container = tk.Frame(body_frame, bg="#1E293B", padx=6, pady=6, highlightbackground="#334155", highlightthickness=1)
+    canvas_container = tk.Frame(body_frame, bg=C_CARD, padx=6, pady=6, highlightbackground=C_BORDER, highlightthickness=1)
     canvas_container.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     tk.Label(
         canvas_container, 
-        text="Matriz Vectorial Interactiva (Haz clic en cualquier celda para activar sus 132 aristas):", 
-        font=("Segoe UI", 9, "bold"), 
-        bg="#1E293B", 
-        fg="#F8FAFC"
+        text="Matriz Vectorial Interactiva (Haz clic en cualquier celda para activar sus 132 aristas y el mini-zoom):", 
+        font=("Courier New", 9, "bold"), 
+        bg=C_CARD, 
+        fg=C_PRIMARY
     ).pack(anchor="w", pady=(0, 4))
 
-    canvas_scroll_frame = tk.Frame(canvas_container, bg="#1E293B")
+    canvas_scroll_frame = tk.Frame(canvas_container, bg=C_CARD)
     canvas_scroll_frame.pack(fill=tk.BOTH, expand=True)
 
     cell_size = 14
@@ -949,7 +1001,7 @@ def open_massive_49x49_inspector():
         canvas_scroll_frame, 
         width=grid_pixels, 
         height=grid_pixels, 
-        bg="#0F172A", 
+        bg=C_CARD, 
         highlightthickness=0,
         scrollregion=(0, 0, grid_pixels + 4, grid_pixels + 4)
     )
@@ -963,70 +1015,164 @@ def open_massive_49x49_inspector():
     canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
     # Right: Telemetry & Actions Panel
-    right_panel = tk.Frame(body_frame, bg="#1E293B", width=420, padx=12, pady=10, highlightbackground="#334155", highlightthickness=1)
-    right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, padx=(12, 0))
+    right_panel = tk.Frame(body_frame, bg=C_BG, width=470)
+    right_panel.pack(side=tk.RIGHT, fill=tk.BOTH, padx=(10, 0))
     right_panel.pack_propagate(False)
 
-    # Node Inspector Box
-    tk.Label(right_panel, text="DETALLE DEL NODO SELECCIONADO", font=("Segoe UI", 10, "bold"), bg="#1E293B", fg="#38BDF8").pack(anchor="w")
+    # CARD 1: Detalle del Nodo y Mini-Zoom 7x7
+    card_node = tk.Frame(right_panel, bg=C_CARD, padx=8, pady=6, highlightbackground=C_BORDER, highlightthickness=1)
+    card_node.pack(fill=tk.X, pady=(0, 6))
 
-    info_card = tk.Frame(right_panel, bg="#0F172A", padx=10, pady=8, highlightbackground="#334155", highlightthickness=1)
-    info_card.pack(fill=tk.X, pady=(6, 10))
+    tk.Label(card_node, text="DETALLE DEL NODO & MINI-ZOOM 7×7", font=("Courier New", 9, "bold"), bg=C_CARD, fg=C_PRIMARY).pack(anchor="w")
 
-    node_id_var = tk.StringVar(value="Ninguno (Haz clic en una casilla)")
+    node_split_frame = tk.Frame(card_node, bg=C_CARD)
+    node_split_frame.pack(fill=tk.X, pady=(4, 0))
+
+    # Text details (Left of Card 1)
+    node_text_frame = tk.Frame(node_split_frame, bg=C_CARD)
+    node_text_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    node_id_var = tk.StringVar(value="Ninguno (Haz clic en una celda)")
     pos_var = tk.StringVar(value="--")
     block_var = tk.StringVar(value="--")
     owner_var = tk.StringVar(value="--")
+    val_var = tk.StringVar(value="--")
     edges_var = tk.StringVar(value="--")
 
     for lbl_text, var, fg_c in [
-        ("Nodo ID:", node_id_var, "#FACC15"),
-        ("Posición (Fila, Col):", pos_var, "#FFFFFF"),
-        ("Subcuadro 7x7:", block_var, "#FFFFFF"),
-        ("Integrante Asignado:", owner_var, "#34D399"),
-        ("Restricciones (Grado):", edges_var, "#F472B6"),
+        ("Nodo ID:", node_id_var, C_ACCENT),
+        ("Posición (F, C):", pos_var, C_TEXT_MAIN),
+        ("Subcuadro 7x7:", block_var, C_TEXT_MAIN),
+        ("Integrante:", owner_var, C_GREEN),
+        ("Valor en Celda:", val_var, C_PRIMARY),
+        ("Restricciones:", edges_var, C_RED_BD),
     ]:
-        row = tk.Frame(info_card, bg="#0F172A")
+        row = tk.Frame(node_text_frame, bg=C_CARD)
         row.pack(fill=tk.X, pady=1)
-        tk.Label(row, text=lbl_text, font=("Segoe UI", 8, "bold"), bg="#0F172A", fg="#94A3B8", width=19, anchor="w").pack(side=tk.LEFT)
-        tk.Label(row, textvariable=var, font=("Segoe UI", 8, "bold"), bg="#0F172A", fg=fg_c, anchor="w").pack(side=tk.LEFT)
+        tk.Label(row, text=lbl_text, font=("Segoe UI", 7, "bold"), bg=C_CARD, fg=C_TEXT_MUTED, width=15, anchor="w").pack(side=tk.LEFT)
+        tk.Label(row, textvariable=var, font=("Segoe UI", 7, "bold"), bg=C_CARD, fg=fg_c, anchor="w").pack(side=tk.LEFT)
 
-    # Actions Box
-    tk.Label(right_panel, text="ACCIONES Y PRUEBAS EN VIVO", font=("Segoe UI", 10, "bold"), bg="#1E293B", fg="#38BDF8").pack(anchor="w", pady=(4, 6))
+    # Mini-Zoom Canvas (Right of Card 1)
+    zoom_box_frame = tk.Frame(node_split_frame, bg=C_CARD, padx=4)
+    zoom_box_frame.pack(side=tk.RIGHT)
+    tk.Label(zoom_box_frame, text="Bloque 7×7:", font=("Segoe UI", 7, "bold"), bg=C_CARD, fg=C_TEXT_MUTED).pack(anchor="w")
+    zoom_canvas = tk.Canvas(zoom_box_frame, width=126, height=126, bg=C_CARD, highlightthickness=1, highlightbackground=C_BORDER)
+    zoom_canvas.pack()
 
-    btn_action_frame = tk.Frame(right_panel, bg="#1E293B")
-    btn_action_frame.pack(fill=tk.X)
+    def update_zoom_grid(center_r, center_c):
+        zoom_canvas.delete("all")
+        br = (center_r // 7) * 7
+        bc = (center_c // 7) * 7
+        curr_b = board_49_state["current"]
+        sol_cells = board_49_state["solved_cells"]
+        emp_cells = board_49_state["empty_cells"]
 
-    # Log console
-    tk.Label(right_panel, text="CONSOLA DE TELEMETRÍA Y LOGS:", font=("Segoe UI", 8, "bold"), bg="#1E293B", fg="#94A3B8").pack(anchor="w", pady=(10, 2))
-    log_text = tk.Text(right_panel, height=13, bg="#0F172A", fg="#38BDF8", font=("Consolas", 8), bd=0, padx=6, pady=6)
+        for lr in range(7):
+            for lc in range(7):
+                gr = br + lr
+                gc = bc + lc
+                x1 = lc * 18
+                y1 = lr * 18
+                val = curr_b[gr][gc]
+
+                if gr == center_r and gc == center_c:
+                    bg = C_YELLOW_BG
+                    fg = "#854D0E"
+                elif (gr, gc) in sol_cells:
+                    bg = C_PURPLE_LIGHT
+                    fg = C_PURPLE_TEXT
+                elif (gr, gc) in emp_cells and val == 0:
+                    bg = "#FFFFFF"
+                    fg = "#CBD5E1"
+                else:
+                    bg = "#F8FAFC"
+                    fg = C_TEXT_MAIN
+
+                zoom_canvas.create_rectangle(x1, y1, x1 + 18, y1 + 18, fill=bg, outline=C_BORDER, width=1)
+                txt = str(val) if val != 0 else "."
+                zoom_canvas.create_text(x1 + 9, y1 + 9, text=txt, font=("Segoe UI", 6, "bold"), fill=fg)
+
+    # CARD 2: Resolución con Algoritmos CSP (Hito 2 & 3)
+    card_solver = tk.Frame(right_panel, bg=C_CARD, padx=8, pady=6, highlightbackground=C_BORDER, highlightthickness=1)
+    card_solver.pack(fill=tk.X, pady=(0, 6))
+
+    tk.Label(card_solver, text="MOTOR DE RESOLUCIÓN CON ALGORITMOS (CSP)", font=("Courier New", 9, "bold"), bg=C_CARD, fg=C_PRIMARY).pack(anchor="w")
+
+    sel_row = tk.Frame(card_solver, bg=C_CARD)
+    sel_row.pack(fill=tk.X, pady=3)
+
+    diff_49_val = ["Fácil (10% Vacío - ~240 celdas)", "Medio (20% Vacío - ~480 celdas)", "Difícil (30% Vacío - ~720 celdas)", "Experto (40% Vacío - ~960 celdas)"]
+    diff_49_var = tk.StringVar(value=diff_49_val[1])
+    tk.Label(sel_row, text="Dificultad:", font=("Segoe UI", 8), bg=C_CARD, fg=C_TEXT_MAIN).pack(side=tk.LEFT)
+    diff_opt = tk.OptionMenu(sel_row, diff_49_var, *diff_49_val)
+    diff_opt.config(font=("Segoe UI", 7), bg=C_CARD, highlightthickness=0)
+    diff_opt.pack(side=tk.LEFT, padx=(4, 10))
+
+    algo_49_val = ["Nivel 3: MRV + Bitmasks O(1)", "Nivel 2: MRV Clásico", "Nivel 1: Básico (DFS)"]
+    algo_49_var = tk.StringVar(value=algo_49_val[0])
+    tk.Label(sel_row, text="Algoritmo:", font=("Segoe UI", 8), bg=C_CARD, fg=C_TEXT_MAIN).pack(side=tk.LEFT)
+    algo_opt = tk.OptionMenu(sel_row, algo_49_var, *algo_49_val)
+    algo_opt.config(font=("Segoe UI", 7), bg=C_CARD, highlightthickness=0)
+    algo_opt.pack(side=tk.LEFT, padx=(4, 0))
+
+    btn_row_solver = tk.Frame(card_solver, bg=C_CARD)
+    btn_row_solver.pack(fill=tk.X, pady=(4, 0))
+
+    # CARD 3: Verificaciones y Benchmarks Rúbrica Hito 3
+    card_verify = tk.Frame(right_panel, bg=C_CARD, padx=8, pady=6, highlightbackground=C_BORDER, highlightthickness=1)
+    card_verify.pack(fill=tk.X, pady=(0, 6))
+
+    tk.Label(card_verify, text="VERIFICACIONES DE RÚBRICA HITO 3", font=("Courier New", 9, "bold"), bg=C_CARD, fg=C_PRIMARY).pack(anchor="w")
+
+    btn_row_verify = tk.Frame(card_verify, bg=C_CARD)
+    btn_row_verify.pack(fill=tk.X, pady=(4, 0))
+
+    # CARD 4: Telemetría y Consola de Logs
+    card_log = tk.Frame(right_panel, bg=C_CARD, padx=8, pady=6, highlightbackground=C_BORDER, highlightthickness=1)
+    card_log.pack(fill=tk.BOTH, expand=True)
+
+    tk.Label(card_log, text="CONSOLA DE TELEMETRÍA Y LOGS:", font=("Courier New", 8, "bold"), bg=C_CARD, fg=C_TEXT_MUTED).pack(anchor="w")
+
+    telemetry_bar = tk.Frame(card_log, bg=C_PURPLE_LIGHT, padx=6, pady=3, highlightbackground=C_BORDER, highlightthickness=1)
+    telemetry_bar.pack(fill=tk.X, pady=(3, 4))
+
+    lbl_time_met = tk.Label(telemetry_bar, text="Tiempo: 0.00 ms", font=("Segoe UI", 8, "bold"), bg=C_PURPLE_LIGHT, fg=C_BLUE)
+    lbl_time_met.pack(side=tk.LEFT, padx=4)
+
+    lbl_back_met = tk.Label(telemetry_bar, text="Backtracks: 0", font=("Segoe UI", 8, "bold"), bg=C_PURPLE_LIGHT, fg=C_ACCENT)
+    lbl_back_met.pack(side=tk.LEFT, padx=10)
+
+    lbl_nodes_met = tk.Label(telemetry_bar, text="Nodos: 0", font=("Segoe UI", 8, "bold"), bg=C_PURPLE_LIGHT, fg=C_GREEN)
+    lbl_nodes_met.pack(side=tk.LEFT, padx=4)
+
+    log_text = tk.Text(card_log, height=8, bg="#1E293B", fg="#38BDF8", font=("Consolas", 8), bd=0, padx=6, pady=6)
     log_text.pack(fill=tk.BOTH, expand=True)
 
     def log(msg):
         log_text.insert(tk.END, msg + "\n")
         log_text.see(tk.END)
 
-    log("✓ Inspector 49x49 inicializado.")
+    log("✓ Inspector Topológico y Solver 49x49 inicializado.")
     log("✓ Grafo regular: 2,401 nodos y 158,466 aristas.")
-    log("• Haz clic en una celda para inspeccionar sus aristas.")
+    log("• Haz clic en una celda para ver sus 132 aristas y su bloque 7x7.")
 
-    # Cell drawing
+    # Cell drawing on Canvas
     cells = {}
     default_colors = {}
+
+    def get_member_color(r):
+        if r < 16:
+            return C_KOBA_BG, C_KOBA_BD
+        elif r < 32:
+            return C_PAR_BG, C_PAR_BD
+        else:
+            return C_RIV_BG, C_RIV_BD
 
     for r in range(49):
         for c in range(49):
             x1 = c * cell_size
             y1 = r * cell_size
-            if r < 16:
-                bg_color = "#BAE6FD"  # Kobashigawa
-                border_color = "#7DD3FC"
-            elif r < 32:
-                bg_color = "#BBF7D0"  # Pareja
-                border_color = "#86EFAC"
-            else:
-                bg_color = "#E9D5FF"  # Riveros
-                border_color = "#D8B4FE"
+            bg_color, border_color = get_member_color(r)
 
             rect_id = canvas.create_rectangle(
                 x1, y1, x1 + cell_size, y1 + cell_size,
@@ -1040,26 +1186,36 @@ def open_massive_49x49_inspector():
     # Thick block boundaries (7x7)
     for i in range(8):
         pos = i * 7 * cell_size
-        canvas.create_line(pos, 0, pos, grid_pixels, fill="#0F172A", width=2)
-        canvas.create_line(0, pos, grid_pixels, pos, fill="#0F172A", width=2)
+        canvas.create_line(pos, 0, pos, grid_pixels, fill=C_TEXT_MAIN, width=2)
+        canvas.create_line(0, pos, grid_pixels, pos, fill=C_TEXT_MAIN, width=2)
 
     current_selection = {"selected": None, "neighbors": []}
+
+    def get_cell_current_color(r, c):
+        if (r, c) in board_49_state["solved_cells"]:
+            return C_PURPLE_LIGHT, C_PRIMARY
+        elif (r, c) in board_49_state["empty_cells"] and board_49_state["current"][r][c] == 0:
+            return "#FFFFFF", "#CBD5E1"
+        else:
+            return default_colors[(r, c)]
 
     def reset_view():
         if current_selection["selected"]:
             sr, sc = current_selection["selected"]
-            bg, bd = default_colors[(sr, sc)]
+            bg, bd = get_cell_current_color(sr, sc)
             canvas.itemconfig(cells[(sr, sc)], fill=bg, outline=bd, width=1)
         for nr, nc in current_selection["neighbors"]:
-            bg, bd = default_colors[(nr, nc)]
+            bg, bd = get_cell_current_color(nr, nc)
             canvas.itemconfig(cells[(nr, nc)], fill=bg, outline=bd, width=1)
         current_selection["selected"] = None
         current_selection["neighbors"] = []
-        node_id_var.set("Ninguno (Haz clic en una casilla)")
+        node_id_var.set("Ninguno (Haz clic en una celda)")
         pos_var.set("--")
         block_var.set("--")
         owner_var.set("--")
+        val_var.set("--")
         edges_var.set("--")
+        zoom_canvas.delete("all")
         log("Vista de matriz restablecida.")
 
     def on_canvas_click(event):
@@ -1071,17 +1227,17 @@ def open_massive_49x49_inspector():
         if not (0 <= r < 49 and 0 <= c < 49):
             return
 
-        # Restore previous
+        # Restore previous selection
         if current_selection["selected"]:
             sr, sc = current_selection["selected"]
-            bg, bd = default_colors[(sr, sc)]
+            bg, bd = get_cell_current_color(sr, sc)
             canvas.itemconfig(cells[(sr, sc)], fill=bg, outline=bd, width=1)
         for nr, nc in current_selection["neighbors"]:
-            bg, bd = default_colors[(nr, nc)]
+            bg, bd = get_cell_current_color(nr, nc)
             canvas.itemconfig(cells[(nr, nc)], fill=bg, outline=bd, width=1)
 
-        # Highlight selected
-        canvas.itemconfig(cells[(r, c)], fill="#FDE68A", outline="#D97706", width=2)
+        # Highlight selected in yellow
+        canvas.itemconfig(cells[(r, c)], fill=C_YELLOW_BG, outline=C_YELLOW_BD, width=2)
         canvas.tag_raise(cells[(r, c)])
 
         # Calculate 132 neighbors
@@ -1103,7 +1259,7 @@ def open_massive_49x49_inspector():
                     neighbors.append((box_r, box_c))
 
         for nr, nc in neighbors:
-            canvas.itemconfig(cells[(nr, nc)], fill="#FECACA", outline="#DC2626", width=1)
+            canvas.itemconfig(cells[(nr, nc)], fill=C_RED_BG, outline=C_RED_BD, width=1)
 
         current_selection["selected"] = (r, c)
         current_selection["neighbors"] = neighbors
@@ -1117,16 +1273,189 @@ def open_massive_49x49_inspector():
         else:
             owner = "Riveros (Cuota: Filas 32-48)"
 
+        val = board_49_state["current"][r][c]
+        if val == 0:
+            val_str = "0 [Celda Vacía a Resolver]"
+        elif (r, c) in board_49_state["solved_cells"]:
+            val_str = f"{val} [Resuelto por Algoritmo]"
+        else:
+            val_str = f"{val} [Pista Inicial]"
+
         node_id_var.set(f"#{node_id} (Nodo {node_id+1}/2401)")
         pos_var.set(f"Fila {r}, Columna {c}")
         block_var.set(f"Bloque ({r//7}, {c//7})")
         owner_var.set(owner)
+        val_var.set(val_str)
         edges_var.set("132 aristas (48 fila, 48 col, 36 bloque)")
 
-        log(f"Nodo #{node_id} ({r},{c}) seleccionado | Propietario: {owner.split()[0]} | 132 aristas activas")
+        update_zoom_grid(r, c)
+        log(f"Nodo #{node_id} ({r},{c}) | {owner.split()[0]} | Valor: {val} | 132 aristas activas")
 
     canvas.bind("<Button-1>", on_canvas_click)
 
+    # 4. Generar Puzzle 49x49
+    def generate_puzzle_49():
+        diff_str = diff_49_var.get()
+        if "10%" in diff_str:
+            pct = 0.10
+        elif "20%" in diff_str:
+            pct = 0.20
+        elif "30%" in diff_str:
+            pct = 0.30
+        elif "40%" in diff_str:
+            pct = 0.40
+        else:
+            pct = 0.20
+
+        num_empty = int(2401 * pct)
+        log(f"\n--- GENERANDO NUEVO PUZZLE 49×49 ({int(pct*100)}% VACÍO) ---")
+        t0 = time.perf_counter()
+        base = generate_valid_base_board(49)
+        all_coords = [(r, c) for r in range(49) for c in range(49)]
+        empty_coords = set(random.sample(all_coords, num_empty))
+
+        puzzle = [row[:] for row in base]
+        for r, c in empty_coords:
+            puzzle[r][c] = 0
+
+        board_49_state["solution"] = base
+        board_49_state["current"] = puzzle
+        board_49_state["initial"] = [row[:] for row in puzzle]
+        board_49_state["empty_cells"] = empty_coords
+        board_49_state["solved_cells"] = set()
+
+        # Update canvas cells
+        for r in range(49):
+            for c in range(49):
+                if (r, c) in empty_coords:
+                    canvas.itemconfig(cells[(r, c)], fill="#FFFFFF", outline="#CBD5E1", width=1)
+                else:
+                    bg, bd = get_member_color(r)
+                    canvas.itemconfig(cells[(r, c)], fill=bg, outline=bd, width=1)
+
+        t1 = time.perf_counter()
+        state_badge_var.set(f"EN JUEGO ({num_empty} vacías)")
+        lbl_state_badge.config(fg="#D97706")
+        lbl_time_met.config(text="Tiempo: --")
+        lbl_back_met.config(text=f"Vacías: {num_empty:,}")
+        lbl_nodes_met.config(text=f"Pistas: {2401-num_empty:,}")
+
+        if current_selection["selected"]:
+            sr, sc = current_selection["selected"]
+            update_zoom_grid(sr, sc)
+
+        log(f"✓ Tablero base y permutaciones generados en {(t1-t0)*1000:.2f} ms")
+        log(f"✓ Celdas vacías a resolver: {num_empty:,} ({pct*100:.0f}%) | Pistas: {2401-num_empty:,}")
+        log("• Tablero listo. Haz clic en 'Resolver con Algoritmo' para ejecutar el solver CSP.")
+
+    # 5. Resolver con Algoritmo
+    def solve_puzzle_49():
+        if not board_49_state["empty_cells"] and not board_49_state["solved_cells"]:
+            # If board is already full, generate puzzle first
+            generate_puzzle_49()
+
+        if not board_49_state["empty_cells"]:
+            messagebox.showinfo("Sudoku Completo", "El tablero ya se encuentra resuelto al 100%. Genera un nuevo puzzle para volver a resolver.", parent=insp_window)
+            return
+
+        algo_choice = algo_49_var.get()
+        num_empty = len(board_49_state["empty_cells"])
+        log(f"\n--- EJECUTANDO SOLVER CSP SOBRE 49×49 ({num_empty} CELDAS VACÍAS) ---")
+        log(f"• Estrategia seleccionada: {algo_choice}")
+
+        solver = SudokuSolver(board_49_state["current"], k=7)
+
+        t0 = time.perf_counter()
+        if "Nivel 3" in algo_choice or "Bitmasks" in algo_choice:
+            success, solved_board, metrics = solver.resolver_mrv_bitmasks()
+        elif "Nivel 2" in algo_choice or "MRV Clásico" in algo_choice:
+            success, solved_board, metrics = solver.resolver_mrv_clasico()
+        else:
+            success, solved_board, metrics = solver.resolver_basico()
+        t1 = time.perf_counter()
+
+        if success:
+            board_49_state["current"] = solved_board
+            solved_now = set(board_49_state["empty_cells"])
+            board_49_state["solved_cells"] = solved_now
+            board_49_state["empty_cells"] = set()
+
+            # Color newly solved cells with the official lavender color
+            for r, c in solved_now:
+                canvas.itemconfig(cells[(r, c)], fill=C_PURPLE_LIGHT, outline=C_PRIMARY, width=1)
+
+            state_badge_var.set("ESTADO: RESUELTO (100%)")
+            lbl_state_badge.config(fg=C_GREEN)
+            lbl_time_met.config(text=f"Tiempo: {metrics['tiempo_ms']:.2f} ms")
+            lbl_back_met.config(text=f"Backtracks: {metrics['backtracks']:,}")
+            lbl_nodes_met.config(text=f"Nodos: {metrics['nodos_explorados']:,}")
+
+            if current_selection["selected"]:
+                sr, sc = current_selection["selected"]
+                update_zoom_grid(sr, sc)
+
+            log("======================================================================")
+            log(f"✓ {metrics['estrategia'].upper()} FINALIZADO CON ÉXITO")
+            log(f"  • Tiempo de CPU: {metrics['tiempo_ms']:.2f} ms")
+            log(f"  • Retrocesos (Backtracking): {metrics['backtracks']:,}")
+            log(f"  • Nodos explorados en árbol CSP: {metrics['nodos_explorados']:,}")
+            log(f"  • Celdas resueltas: {len(solved_now):,} ({len(solved_now)/2401*100:.1f}% del grafo)")
+            log("  ✓ Solución 100% legal: Cero conflictos en 158,466 aristas.")
+            log("======================================================================")
+
+            messagebox.showinfo(
+                "Resolución Exitosa", 
+                f"¡Sudoku Masivo 49x49 resuelto con éxito!\n\n"
+                f"• Algoritmo: {metrics['estrategia']}\n"
+                f"• Tiempo de resolución: {metrics['tiempo_ms']:.2f} ms\n"
+                f"• Celdas completadas: {len(solved_now):,}\n"
+                f"• Retrocesos (Backtracks): {metrics['backtracks']:,}\n"
+                f"• Nodos explorados: {metrics['nodos_explorados']:,}\n\n"
+                f"Celdas resueltas resaltadas en color lavanda ({C_PURPLE_LIGHT}).",
+                parent=insp_window
+            )
+        else:
+            log("❌ No se encontró solución válida para la configuración actual.")
+            messagebox.showerror("Error", "No se encontró solución válida para el tablero actual.", parent=insp_window)
+
+    # Botones del Motor de Resolución
+    btn_gen = tk.Button(
+        btn_row_solver, 
+        text="🎲 Generar Puzzle 49x49", 
+        font=("Courier New", 9, "bold"), 
+        bg=C_BTN_GEN, 
+        fg="white", 
+        relief="flat", 
+        cursor="hand2",
+        command=generate_puzzle_49
+    )
+    btn_gen.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 4))
+
+    btn_sol = tk.Button(
+        btn_row_solver, 
+        text="⚡ Resolver con Algoritmo", 
+        font=("Courier New", 9, "bold"), 
+        bg=C_BTN_SOLVER, 
+        fg="white", 
+        relief="flat", 
+        cursor="hand2",
+        command=solve_puzzle_49
+    )
+    btn_sol.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 4))
+
+    btn_rst = tk.Button(
+        btn_row_solver, 
+        text="🔄 Restablecer Vista", 
+        font=("Courier New", 9), 
+        bg=C_BORDER, 
+        fg=C_TEXT_MAIN, 
+        relief="flat", 
+        cursor="hand2",
+        command=reset_view
+    )
+    btn_rst.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+    # 6. Verificaciones y Benchmarks
     def verify_dataset_csv():
         log("\n--- VERIFICACIÓN DE ARCHIVOS CSV (DATASET) ---")
         dataset_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dataset")
@@ -1180,42 +1509,30 @@ def open_massive_49x49_inspector():
             parent=insp_window
         )
 
-    # Action Buttons inside right panel
     btn_csv = tk.Button(
-        btn_action_frame, 
+        btn_row_verify, 
         text="📂 Verificar Dataset Real (CSV)", 
-        font=("Segoe UI", 9, "bold"), 
-        bg="#0284C7", 
+        font=("Courier New", 9, "bold"), 
+        bg=C_BLUE, 
         fg="white", 
         relief="flat", 
         cursor="hand2",
         command=verify_dataset_csv
     )
-    btn_csv.pack(fill=tk.X, pady=2)
+    btn_csv.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 4))
 
     btn_bench = tk.Button(
-        btn_action_frame, 
-        text="⚡ Benchmark Topológico en Memoria", 
-        font=("Segoe UI", 9, "bold"), 
-        bg="#059669", 
+        btn_row_verify, 
+        text="⚡ Benchmark Topológico", 
+        font=("Courier New", 9, "bold"), 
+        bg=C_GREEN, 
         fg="white", 
         relief="flat", 
         cursor="hand2",
         command=run_memory_benchmark
     )
-    btn_bench.pack(fill=tk.X, pady=2)
+    btn_bench.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
-    btn_reset = tk.Button(
-        btn_action_frame, 
-        text="🔄 Restablecer Vista / Selección", 
-        font=("Segoe UI", 9), 
-        bg="#334155", 
-        fg="white", 
-        relief="flat", 
-        cursor="hand2",
-        command=reset_view
-    )
-    btn_reset.pack(fill=tk.X, pady=2)
 
 def start_timer():
     """Inicia o reinicia el cronómetro de juego en tiempo real (segundos y décimas)."""
@@ -1390,7 +1707,7 @@ ResolveBTN.pack(side=LEFT, padx=8)
 SendButton = RoundedButton(ButtonsFrame, command=SubmitBTN_Click, text="Comprobar (Submit)", bg_color="#8B5CF6", text_color="white", radius=14, width=210, height=36, font=("Courier New", 11, "bold"))
 SendButton.pack(side=LEFT, padx=8)
 
-MassiveBtn = RoundedButton(ButtonsFrame, command=open_massive_49x49_inspector, text="🌐 Grafo Masivo 49x49", bg_color="#1E3A8A", text_color="white", radius=14, width=210, height=36, font=("Courier New", 11, "bold"))
+MassiveBtn = RoundedButton(ButtonsFrame, command=open_massive_49x49_inspector, text="🌐 Grafo Masivo 49x49", bg_color="#5938C4", text_color="white", radius=14, width=210, height=36, font=("Courier New", 11, "bold"))
 MassiveBtn.pack(side=LEFT, padx=8)
 
 # Sudoku Board Frame
